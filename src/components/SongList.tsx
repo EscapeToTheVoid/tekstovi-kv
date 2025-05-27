@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { DragDropContext, Droppable, Draggable, DropResult, DragStart, DragUpdate } from '@hello-pangea/dnd';
 import { SongItem } from '@/types/songs';
-import { kv } from '@vercel/kv';
 
 interface SongListProps {
   songItems: SongItem[];
