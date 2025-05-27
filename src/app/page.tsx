@@ -183,10 +183,10 @@ export default function Home() {
   };
 
   const moveToTop = async (title: string) => {
-    const itemIndex = songItems.findIndex(item => item.title === title);
+    const updatedItems = [...songItems];
+    const itemIndex = updatedItems.findIndex(item => item.title === title);
     if (itemIndex === -1) return;
     
-    const updatedItems = [...songItems];
     const [movedItem] = updatedItems.splice(itemIndex, 1);
     updatedItems.unshift(movedItem);
     
