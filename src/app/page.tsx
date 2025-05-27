@@ -59,19 +59,32 @@ export default function Home() {
     }
   };
 
-  const toggleHidden = (title: string) => {
-    setSongItems(items => 
-      items.map(item => 
-        item.title === title 
-          ? { ...item, hidden: !item.hidden }
-          : item
-      )
+  const toggleHidden = async (title: string) => {
+    const updatedItems = songItems.map(item => 
+      item.title === title 
+        ? { ...item, hidden: !item.hidden }
+        : item
     );
+    setSongItems(updatedItems);
+
+    // Save the updated order to KV
+    try {
+      await fetch('/api/songs/order', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(updatedItems),
+      });
+    } catch (error) {
+      console.error('Failed to save song order:', error);
+    }
   };
 
   const handleDelete = async (title: string) => {
     // Update both states at once to avoid multiple re-renders
-    setSongItems(items => items.filter(item => item.title !== title));
+    const updatedItems = songItems.filter(item => item.title !== title);
+    setSongItems(updatedItems);
     setSongs(prevSongs => {
       const newSongs = { ...prevSongs };
       delete newSongs[title];
@@ -80,13 +93,22 @@ export default function Home() {
 
     // Save to backend
     try {
-      await fetch('/api/songs', {
-        method: 'DELETE',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ title }),
-      });
+      await Promise.all([
+        fetch('/api/songs', {
+          method: 'DELETE',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ title }),
+        }),
+        fetch('/api/songs/order', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(updatedItems),
+        })
+      ]);
     } catch (error) {
       console.error('Failed to delete song:', error);
     }
@@ -160,15 +182,33 @@ export default function Home() {
     }
   };
 
-  const moveToTop = (title: string) => {
-    setSongItems(items => {
-      const itemIndex = items.findIndex(item => item.title === title);
-      if (itemIndex === -1) return items;
-      
-      const newItems = [...items];
-      const [movedItem] = newItems.splice(itemIndex, 1);
-      return [movedItem, ...newItems];
-    });
+  const moveToTop = async (title: string) => {
+    const updatedItems = songItems.map(item => {
+      if (item.title === title) {
+        const itemIndex = songItems.findIndex(i => i.title === title);
+        if (itemIndex === -1) return item;
+        
+        const newItems = [...songItems];
+        const [movedItem] = newItems.splice(itemIndex, 1);
+        return [movedItem, ...newItems];
+      }
+      return item;
+    }).flat();
+    
+    setSongItems(updatedItems);
+
+    // Save the updated order to KV
+    try {
+      await fetch('/api/songs/order', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(updatedItems),
+      });
+    } catch (error) {
+      console.error('Failed to save song order:', error);
+    }
   };
 
   const handleUpdateTitle = async (oldTitle: string, newTitle: string) => {
