@@ -46,8 +46,9 @@ export default function Home() {
   const handleReorder = async (newItems: SongItem[], draggedItemTitle: string) => {
     // Update state first
     setSongItems(newItems);
-    // Keep focus on the dragged item
+    // Keep focus on the dragged item for both title states
     setSelectedTitle(draggedItemTitle);
+    setVisibleSongTitle(draggedItemTitle);
 
     // Save the new order to KV
     try {
