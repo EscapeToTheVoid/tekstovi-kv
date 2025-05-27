@@ -163,7 +163,7 @@ export default function SongList({
               }`}
               title={showTools ? "Hide Tools" : "Show Tools"}
             >
-              {showTools ? '⛓️‍💥' : '🔗'}
+              {showTools ? '🛠️' : '🔧'}
             </button>
           </div>
         </div>
