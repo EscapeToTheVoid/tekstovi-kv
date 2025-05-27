@@ -44,18 +44,28 @@ export default function Home() {
   }, []);
 
   const handleReorder = async (newItems: SongItem[]) => {
+    // Update state first
     setSongItems(newItems);
+
     // Save the new order to KV
     try {
-      await fetch('/api/songs/order', {
+      const response = await fetch('/api/songs/order', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify(newItems),
       });
+
+      if (!response.ok) {
+        throw new Error('Failed to save order');
+      }
+
+      console.log('Order saved successfully');
     } catch (error) {
       console.error('Failed to save song order:', error);
+      // Optionally revert the state if save fails
+      // setSongItems(songItems);
     }
   };
 

@@ -52,9 +52,15 @@ export async function POST(request: Request) {
   try {
     const order = await request.json();
     console.log('Received order to save:', order);
+    
+    if (!Array.isArray(order)) {
+      return NextResponse.json({ error: 'Invalid order format' }, { status: 400 });
+    }
+
     await kv.set('songOrder', order);
     console.log('Order saved successfully');
-    return NextResponse.json({ success: true });
+    
+    return NextResponse.json({ success: true, message: 'Order saved successfully' });
   } catch (error) {
     console.error('Error saving song order:', error);
     return NextResponse.json({ error: 'Failed to save song order' }, { status: 500 });
