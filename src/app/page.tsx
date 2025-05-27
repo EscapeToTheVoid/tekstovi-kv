@@ -183,17 +183,12 @@ export default function Home() {
   };
 
   const moveToTop = async (title: string) => {
-    const updatedItems = songItems.map(item => {
-      if (item.title === title) {
-        const itemIndex = songItems.findIndex(i => i.title === title);
-        if (itemIndex === -1) return item;
-        
-        const newItems = [...songItems];
-        const [movedItem] = newItems.splice(itemIndex, 1);
-        return [movedItem, ...newItems];
-      }
-      return item;
-    }).flat();
+    const itemIndex = songItems.findIndex(item => item.title === title);
+    if (itemIndex === -1) return;
+    
+    const updatedItems = [...songItems];
+    const [movedItem] = updatedItems.splice(itemIndex, 1);
+    updatedItems.unshift(movedItem);
     
     setSongItems(updatedItems);
 
