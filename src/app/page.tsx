@@ -43,9 +43,11 @@ export default function Home() {
       });
   }, []);
 
-  const handleReorder = async (newItems: SongItem[]) => {
+  const handleReorder = async (newItems: SongItem[], draggedItemTitle: string) => {
     // Update state first
     setSongItems(newItems);
+    // Keep focus on the dragged item
+    setSelectedTitle(draggedItemTitle);
 
     // Save the new order to KV
     try {
@@ -64,8 +66,6 @@ export default function Home() {
       console.log('Order saved successfully');
     } catch (error) {
       console.error('Failed to save song order:', error);
-      // Optionally revert the state if save fails
-      // setSongItems(songItems);
     }
   };
 

@@ -6,7 +6,7 @@ interface SongListProps {
   songItems: SongItem[];
   selectedTitle: string;
   onSelect: (title: string) => void;
-  onReorder: (newItems: SongItem[]) => void;
+  onReorder: (newItems: SongItem[], draggedItemTitle: string) => void;
   onToggleHidden: (title: string) => void;
   onDelete: (title: string) => void;
   onAdd: () => void;
@@ -40,7 +40,7 @@ export default function SongList({
     const [reorderedItem] = items.splice(result.source.index, 1);
     items.splice(result.destination.index, 0, reorderedItem);
 
-    onReorder(items);
+    onReorder(items, reorderedItem.title);
   };
 
   const handleDragStart = (start: DragStart) => {
