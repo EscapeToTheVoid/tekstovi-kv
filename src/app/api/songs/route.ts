@@ -7,7 +7,9 @@ interface SongData {
 
 async function readSongs(): Promise<SongData> {
   try {
+    console.log('Reading songs from KV...');
     const songs = await kv.get<SongData>('songs');
+    console.log('Songs read from KV:', songs);
     return songs || {};
   } catch (error) {
     console.error('Error reading songs:', error);
@@ -17,7 +19,9 @@ async function readSongs(): Promise<SongData> {
 
 async function writeSongs(songs: SongData) {
   try {
+    console.log('Writing songs to KV:', songs);
     await kv.set('songs', songs);
+    console.log('Songs written to KV successfully');
   } catch (error) {
     console.error('Error writing songs:', error);
     throw error;
@@ -26,10 +30,12 @@ async function writeSongs(songs: SongData) {
 
 export async function GET() {
   try {
+    console.log('GET request received');
     const songs = await readSongs();
+    console.log('Returning songs:', songs);
     return NextResponse.json(songs);
   } catch (error) {
-    console.error('Error loading songs:', error);
+    console.error('Error in GET:', error);
     return NextResponse.json(
       { error: 'Failed to load songs' },
       { status: 500 }
@@ -39,10 +45,13 @@ export async function GET() {
 
 export async function POST(request: Request) {
   try {
+    console.log('POST request received');
     const { title, lyrics } = await request.json();
+    console.log('Received data:', { title, lyrics });
     const songs = await readSongs();
 
     if (songs[title]) {
+      console.log('Song already exists:', title);
       return NextResponse.json(
         { error: 'Song already exists' },
         { status: 400 }
@@ -51,10 +60,11 @@ export async function POST(request: Request) {
 
     songs[title] = lyrics;
     await writeSongs(songs);
+    console.log('Song added successfully:', title);
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error('Error adding song:', error);
+    console.error('Error in POST:', error);
     return NextResponse.json(
       { error: 'Failed to add song' },
       { status: 500 }

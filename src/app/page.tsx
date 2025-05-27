@@ -18,15 +18,26 @@ export default function Home() {
 
   useEffect(() => {
     // Load songs data
+    console.log('Loading songs data...');
     fetch('/api/songs')
-      .then(res => res.json())
+      .then(res => {
+        if (!res.ok) {
+          throw new Error(`HTTP error! status: ${res.status}`);
+        }
+        return res.json();
+      })
       .then((data: SongsData) => {
+        console.log('Songs data loaded:', data);
         setSongs(data);
         // Initialize song items with hidden state
         setSongItems(Object.keys(data).map(title => ({
           title,
           hidden: false
         })));
+      })
+      .catch(error => {
+        console.error('Error loading songs:', error);
+        alert('Failed to load songs. Please try refreshing the page.');
       });
   }, []);
 
@@ -83,15 +94,35 @@ export default function Home() {
 
     // Save to backend
     try {
-      await fetch('/api/songs', {
+      console.log('Saving new song:', newSong);
+      const response = await fetch('/api/songs', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify(newSong),
       });
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      
+      const result = await response.json();
+      console.log('Save response:', result);
+      
+      if (!result.success) {
+        throw new Error(result.error || 'Failed to save song');
+      }
     } catch (error) {
       console.error('Failed to add song:', error);
+      alert('Failed to save song. Please try again.');
+      // Revert the state changes
+      setSongs(prev => {
+        const newSongs = { ...prev };
+        delete newSongs[title];
+        return newSongs;
+      });
+      setSongItems(prev => prev.filter(item => item.title !== title));
     }
   };
 
