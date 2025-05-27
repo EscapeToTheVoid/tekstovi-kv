@@ -241,6 +241,11 @@ export default function Home() {
       return;
     }
 
+    // Store the original state in case we need to revert
+    const originalSongs = { ...songs };
+    const originalSongItems = [...songItems];
+    const originalSelectedTitle = selectedTitle;
+
     // Update state
     setSongs(prev => {
       const newSongs = { ...prev };
@@ -263,15 +268,25 @@ export default function Home() {
 
     // Save to backend
     try {
-      await fetch('/api/songs', {
+      const response = await fetch('/api/songs', {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({ oldTitle, newTitle }),
       });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || 'Failed to update song title');
+      }
     } catch (error) {
       console.error('Failed to update song title:', error);
+      // Revert state changes
+      setSongs(originalSongs);
+      setSongItems(originalSongItems);
+      setSelectedTitle(originalSelectedTitle);
+      alert('Failed to update song title. Please try again.');
     }
   };
 
