@@ -1,14 +1,14 @@
 import { NextResponse } from 'next/server';
 import { kv } from '@vercel/kv';
 
-interface SongData {
-  [title: string]: string;
+interface SongsData {
+  [key: string]: string;
 }
 
-async function readSongs(): Promise<SongData> {
+async function readSongs(): Promise<SongsData> {
   try {
     console.log('Reading songs from KV...');
-    const songs = await kv.get<SongData>('songs');
+    const songs = await kv.get<SongsData>('songs');
     console.log('Songs read from KV:', songs);
     return songs || {};
   } catch (error) {
@@ -17,7 +17,7 @@ async function readSongs(): Promise<SongData> {
   }
 }
 
-async function writeSongs(songs: SongData) {
+async function writeSongs(songs: SongsData) {
   try {
     console.log('Writing songs to KV:', songs);
     await kv.set('songs', songs);
@@ -30,45 +30,40 @@ async function writeSongs(songs: SongData) {
 
 export async function GET() {
   try {
-    console.log('GET request received');
-    const songs = await readSongs();
-    console.log('Returning songs:', songs);
+    console.log('Fetching songs from KV...');
+    const songs = await kv.get<SongsData>('songs');
+    console.log('Fetched songs:', songs);
     return NextResponse.json(songs);
   } catch (error) {
-    console.error('Error in GET:', error);
-    return NextResponse.json(
-      { error: 'Failed to load songs' },
-      { status: 500 }
-    );
+    console.error('Error fetching songs:', error);
+    return NextResponse.json({ error: 'Failed to fetch songs' }, { status: 500 });
   }
 }
 
 export async function POST(request: Request) {
   try {
-    console.log('POST request received');
-    const { title, lyrics } = await request.json();
-    console.log('Received data:', { title, lyrics });
-    const songs = await readSongs();
+    const song = await request.json();
+    console.log('Received song to save:', song);
 
-    if (songs[title]) {
-      console.log('Song already exists:', title);
-      return NextResponse.json(
-        { error: 'Song already exists' },
-        { status: 400 }
-      );
+    // Get existing songs
+    const existingSongs = (await kv.get<SongsData>('songs')) || {};
+    console.log('Existing songs:', existingSongs);
+
+    // Check for duplicate
+    if (existingSongs[song.title]) {
+      console.log('Duplicate song found:', song.title);
+      return NextResponse.json({ error: 'Song already exists' }, { status: 400 });
     }
 
-    songs[title] = lyrics;
-    await writeSongs(songs);
-    console.log('Song added successfully:', title);
+    // Add new song
+    const updatedSongs = { ...existingSongs, [song.title]: song.lyrics };
+    console.log('Saving updated songs:', updatedSongs);
+    await kv.set('songs', updatedSongs);
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error('Error in POST:', error);
-    return NextResponse.json(
-      { error: 'Failed to add song' },
-      { status: 500 }
-    );
+    console.error('Error saving song:', error);
+    return NextResponse.json({ error: 'Failed to save song' }, { status: 500 });
   }
 }
 

@@ -127,6 +127,16 @@ export default function Home() {
       if (!result.success) {
         throw new Error(result.error || 'Failed to save song');
       }
+
+      // Save the updated order
+      const updatedOrder = [...songItems, newSongItem];
+      await fetch('/api/songs/order', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(updatedOrder),
+      });
     } catch (error) {
       console.error('Failed to add song:', error);
       alert('Failed to save song. Please try again.');
