@@ -183,14 +183,14 @@ export default function Home() {
   };
 
   const moveToTop = async (title: string) => {
-    const updatedItems = [...songItems];
-    const itemIndex = updatedItems.findIndex(item => item.title === title);
+    const itemIndex = songItems.findIndex(item => item.title === title);
     if (itemIndex === -1) return;
     
-    const [movedItem] = updatedItems.splice(itemIndex, 1);
-    updatedItems.unshift(movedItem);
+    const newItems = [...songItems];
+    const [movedItem] = newItems.splice(itemIndex, 1);
+    newItems.unshift(movedItem);
     
-    setSongItems(updatedItems);
+    setSongItems(newItems);
 
     // Save the updated order to KV
     try {
@@ -199,7 +199,7 @@ export default function Home() {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(updatedItems),
+        body: JSON.stringify(newItems),
       });
     } catch (error) {
       console.error('Failed to save song order:', error);
