@@ -74,8 +74,17 @@ export default function Home() {
   };
 
   const handleSelect = (title: string) => {
+    // Always update both states and force a scroll
     setSelectedTitle(title);
     setVisibleSongTitle(title);
+    
+    // Force scroll to the selected song
+    requestAnimationFrame(() => {
+      const element = document.getElementById(`song-${title}`);
+      if (element) {
+        element.scrollIntoView({ behavior: 'smooth' });
+      }
+    });
   };
 
   const toggleHidden = async (title: string) => {
