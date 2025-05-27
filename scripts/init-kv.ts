@@ -7,6 +7,11 @@ interface SongsData {
   [title: string]: string;
 }
 
+interface SongItem {
+  title: string;
+  hidden: boolean;
+}
+
 async function initializeKV() {
   try {
     // Read the JSON file
@@ -18,9 +23,19 @@ async function initializeKV() {
     await kv.set('songs', songsData);
     console.log('Successfully initialized Vercel KV with songs data!');
     
+    // Create and store initial song order
+    const initialOrder: SongItem[] = Object.keys(songsData).map(title => ({
+      title,
+      hidden: false
+    }));
+    await kv.set('songOrder', initialOrder);
+    console.log('Successfully initialized song order in Vercel KV!');
+    
     // Verify the data was stored correctly
     const storedSongs = await kv.get('songs') as SongsData;
+    const storedOrder = await kv.get('songOrder') as SongItem[];
     console.log(`Stored ${Object.keys(storedSongs || {}).length} songs`);
+    console.log(`Stored ${storedOrder?.length || 0} song order items`);
   } catch (error) {
     console.error('Error initializing KV:', error);
     process.exit(1);

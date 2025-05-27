@@ -17,23 +17,25 @@ export default function Home() {
   const [visibleSongTitle, setVisibleSongTitle] = useState('');
 
   useEffect(() => {
-    // Load songs data
+    // Load songs data and order
     console.log('Loading songs data...');
-    fetch('/api/songs')
-      .then(res => {
-        if (!res.ok) {
-          throw new Error(`HTTP error! status: ${res.status}`);
+    Promise.all([
+      fetch('/api/songs').then(res => res.json()),
+      fetch('/api/songs/order').then(res => res.json())
+    ])
+      .then(([songsData, orderData]) => {
+        console.log('Songs data loaded:', songsData);
+        setSongs(songsData);
+        
+        // If we have saved order, use it; otherwise create default order
+        if (orderData && orderData.length > 0) {
+          setSongItems(orderData);
+        } else {
+          setSongItems(Object.keys(songsData).map(title => ({
+            title,
+            hidden: false
+          })));
         }
-        return res.json();
-      })
-      .then((data: SongsData) => {
-        console.log('Songs data loaded:', data);
-        setSongs(data);
-        // Initialize song items with hidden state
-        setSongItems(Object.keys(data).map(title => ({
-          title,
-          hidden: false
-        })));
       })
       .catch(error => {
         console.error('Error loading songs:', error);
@@ -41,8 +43,20 @@ export default function Home() {
       });
   }, []);
 
-  const handleReorder = (newItems: SongItem[]) => {
+  const handleReorder = async (newItems: SongItem[]) => {
     setSongItems(newItems);
+    // Save the new order to KV
+    try {
+      await fetch('/api/songs/order', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(newItems),
+      });
+    } catch (error) {
+      console.error('Failed to save song order:', error);
+    }
   };
 
   const toggleHidden = (title: string) => {
