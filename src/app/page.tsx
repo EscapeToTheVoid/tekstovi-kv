@@ -46,9 +46,12 @@ export default function Home() {
   const handleReorder = async (newItems: SongItem[], draggedItemTitle: string) => {
     // Update state first
     setSongItems(newItems);
-    // Keep focus on the dragged item for both title states
-    setSelectedTitle(draggedItemTitle);
-    setVisibleSongTitle(draggedItemTitle);
+    
+    // Ensure both title states are updated to maintain selection
+    requestAnimationFrame(() => {
+      setSelectedTitle(draggedItemTitle);
+      setVisibleSongTitle(draggedItemTitle);
+    });
 
     // Save the new order to KV
     try {
@@ -68,6 +71,11 @@ export default function Home() {
     } catch (error) {
       console.error('Failed to save song order:', error);
     }
+  };
+
+  const handleSelect = (title: string) => {
+    setSelectedTitle(title);
+    setVisibleSongTitle(title);
   };
 
   const toggleHidden = async (title: string) => {
@@ -370,7 +378,7 @@ export default function Home() {
             <SongList 
               songItems={songItems}
               selectedTitle={visibleSongTitle}
-              onSelect={setSelectedTitle}
+              onSelect={handleSelect}
               onReorder={handleReorder}
               onToggleHidden={toggleHidden}
               onDelete={handleDelete}
