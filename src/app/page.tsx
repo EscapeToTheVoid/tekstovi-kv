@@ -301,11 +301,20 @@ export default function Home() {
   };
 
   const handleExportJson = async () => {
+    // Get current date and time in YYYYMMDD_HHMMSS format
+    const now = new Date();
+    const timestamp = now.getFullYear().toString() +
+      (now.getMonth() + 1).toString().padStart(2, '0') +
+      now.getDate().toString().padStart(2, '0') + '_' +
+      now.getHours().toString().padStart(2, '0') +
+      now.getMinutes().toString().padStart(2, '0') +
+      now.getSeconds().toString().padStart(2, '0');
+
     const blob = new Blob([JSON.stringify(songs, null, 2)], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = 'MAYDAY_songs.json';
+    a.download = `MAYDAY_songs_${timestamp}.json`;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
