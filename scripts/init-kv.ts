@@ -27,4 +27,17 @@ async function initializeKV() {
   }
 }
 
+// Temporary script to fetch and log the contents of the 'songs' key
+async function verifyKVData() {
+  try {
+    const storedSongs = await kv.get('songs') as SongsData;
+    console.log('Current KV data:', storedSongs);
+  } catch (error) {
+    console.error('Error fetching KV data:', error);
+  }
+}
+
+// Uncomment the line below to run the verification
+verifyKVData();
+
 initializeKV(); 
