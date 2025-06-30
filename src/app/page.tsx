@@ -555,7 +555,7 @@ export default function Home() {
           className="w-12 h-12 bg-blue-500 hover:bg-blue-600 text-white rounded-full shadow-lg flex items-center justify-center text-xl transition-colors"
           title={showLeftPane ? "Hide Song List" : "Show Song List"}
         >
-          {showLeftPane ? '🢀' : '⧉'}
+          {showLeftPane ? '🢠' : '⧉'}
         </button>
       </div>
     </div>
