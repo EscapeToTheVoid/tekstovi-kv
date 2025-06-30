@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { SongsData, SongItem } from '@/types/songs';
 import SongList from '@/components/SongList';
 import LyricsView from '@/components/LyricsView';
@@ -15,6 +15,7 @@ export default function Home() {
   const [masterFontSize, setMasterFontSize] = useState(16);
   const [showLeftPane, setShowLeftPane] = useState(true);
   const [visibleSongTitle, setVisibleSongTitle] = useState('');
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     // Load songs data and order
@@ -325,7 +326,13 @@ export default function Home() {
       now.getMinutes().toString().padStart(2, '0') +
       now.getSeconds().toString().padStart(2, '0');
 
-    const blob = new Blob([JSON.stringify(songs, null, 2)], { type: 'application/json' });
+    // Export both songs and order (with hidden status)
+    const exportData = {
+      songs,
+      order: songItems
+    };
+
+    const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
@@ -334,6 +341,60 @@ export default function Home() {
     a.click();
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
+  };
+
+  const handleImportJson = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = async (event) => {
+      try {
+        const json = JSON.parse(event.target?.result as string);
+        // New format: { songs: {...}, order: [...] }
+        if (json.songs && Array.isArray(json.order)) {
+          setSongs(json.songs);
+          setSongItems(json.order);
+          // Persist to backend
+          await fetch('/api/songs', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(json.songs),
+          });
+          await fetch('/api/songs/order', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(json.order),
+          });
+        } else if (typeof json === 'object' && !Array.isArray(json)) {
+          // Old format: { title: lyrics, ... }
+          setSongs(json);
+          const newSongItems = Object.keys(json).map(title => ({
+            title,
+            hidden: false,
+          }));
+          setSongItems(newSongItems);
+          // Persist to backend
+          await fetch('/api/songs', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(json),
+          });
+          await fetch('/api/songs/order', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(newSongItems),
+          });
+        } else {
+          alert('Invalid JSON format.');
+          return;
+        }
+        alert('Songs imported successfully!');
+      } catch (err) {
+        alert('Failed to import JSON: ' + err);
+      }
+    };
+    reader.readAsText(file);
   };
 
   return (
@@ -437,6 +498,13 @@ export default function Home() {
       </div>
 
       {/* Floating Action Buttons */}
+      <input
+        type="file"
+        accept="application/json"
+        style={{ display: 'none' }}
+        ref={fileInputRef}
+        onChange={handleImportJson}
+      />
       <div className="fixed bottom-6 right-6 flex flex-col gap-2">
         <button
           onClick={() => adjustMasterFontSize(1)}
@@ -458,6 +526,13 @@ export default function Home() {
           title="Export JSON"
         >
           ⤓
+        </button>
+        <button
+          onClick={() => fileInputRef.current?.click()}
+          className="w-12 h-12 bg-blue-500 hover:bg-blue-600 text-white rounded-full shadow-lg flex items-center justify-center text-xl transition-colors"
+          title="Import JSON"
+        >
+          ⤒
         </button>
         <button
           onClick={() => setShowLeftPane(!showLeftPane)}

@@ -170,7 +170,7 @@ export default function SongList({
 
         {/* Search Input */}
         {showSearch && (
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 relative">
             <input
               type="text"
               placeholder="Search songs..."
@@ -179,6 +179,17 @@ export default function SongList({
               className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:border-blue-500"
               autoFocus
             />
+            {searchTerm && (
+              <button
+                onClick={() => setSearchTerm('')}
+                className="absolute right-3 text-gray-400 hover:text-red-500 focus:outline-none"
+                style={{ top: '50%', transform: 'translateY(-50%)' }}
+                tabIndex={-1}
+                aria-label="Clear search"
+              >
+                ×
+              </button>
+            )}
           </div>
         )}
       </div>
