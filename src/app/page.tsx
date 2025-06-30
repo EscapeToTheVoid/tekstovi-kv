@@ -16,6 +16,7 @@ export default function Home() {
   const [showLeftPane, setShowLeftPane] = useState(true);
   const [visibleSongTitle, setVisibleSongTitle] = useState('');
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [showTools, setShowTools] = useState(false);
 
   useEffect(() => {
     // Load songs data and order
@@ -497,7 +498,7 @@ export default function Home() {
         />
       </div>
 
-      {/* Floating Action Buttons */}
+      {/* Floating Action Buttons (Right) */}
       <input
         type="file"
         accept="application/json"
@@ -505,41 +506,56 @@ export default function Home() {
         ref={fileInputRef}
         onChange={handleImportJson}
       />
-      <div className="fixed bottom-6 right-6 flex flex-col gap-2">
+      <div className="fixed bottom-6 right-6 flex flex-col-reverse gap-2 items-end">
+        {/* Show/Hide Tools Button at the bottom */}
         <button
-          onClick={() => adjustMasterFontSize(1)}
-          className="w-12 h-12 bg-blue-500 hover:bg-blue-600 text-white rounded-full shadow-lg flex items-center justify-center text-2xl transition-colors"
-          title="Increase All Text Size"
-        >
-          +
-        </button>
-        <button
-          onClick={() => adjustMasterFontSize(-1)}
-          className="w-12 h-12 bg-blue-500 hover:bg-blue-600 text-white rounded-full shadow-lg flex items-center justify-center text-2xl transition-colors"
-          title="Decrease All Text Size"
-        >
-          −
-        </button>
-        <button
-          onClick={handleExportJson}
+          onClick={() => setShowTools((v) => !v)}
           className="w-12 h-12 bg-blue-500 hover:bg-blue-600 text-white rounded-full shadow-lg flex items-center justify-center text-xl transition-colors"
-          title="Export JSON"
+          title={showTools ? 'Hide Tools' : 'Show Tools'}
         >
-          ⤓
+          {showTools ? '•' : '⋮'}
         </button>
-        <button
-          onClick={() => fileInputRef.current?.click()}
-          className="w-12 h-12 bg-blue-500 hover:bg-blue-600 text-white rounded-full shadow-lg flex items-center justify-center text-xl transition-colors"
-          title="Import JSON"
-        >
-          ⤒
-        </button>
+        {showTools && (
+          <div className="flex flex-col gap-2 mb-2">
+            <button
+              onClick={() => adjustMasterFontSize(1)}
+              className="w-12 h-12 bg-blue-500 hover:bg-blue-600 text-white rounded-full shadow-lg flex items-center justify-center text-2xl transition-colors"
+              title="Increase All Text Size"
+            >
+              +
+            </button>
+            <button
+              onClick={() => adjustMasterFontSize(-1)}
+              className="w-12 h-12 bg-blue-500 hover:bg-blue-600 text-white rounded-full shadow-lg flex items-center justify-center text-2xl transition-colors"
+              title="Decrease All Text Size"
+            >
+              −
+            </button>
+            <button
+              onClick={handleExportJson}
+              className="w-12 h-12 bg-blue-500 hover:bg-blue-600 text-white rounded-full shadow-lg flex items-center justify-center text-xl transition-colors"
+              title="Export JSON"
+            >
+              ⤓
+            </button>
+            <button
+              onClick={() => fileInputRef.current?.click()}
+              className="w-12 h-12 bg-blue-500 hover:bg-blue-600 text-white rounded-full shadow-lg flex items-center justify-center text-xl transition-colors"
+              title="Import JSON"
+            >
+              ⤒
+            </button>
+          </div>
+        )}
+      </div>
+      {/* Pane Toggle Button (Left) */}
+      <div className="fixed bottom-6 left-6 flex flex-col gap-2 items-start">
         <button
           onClick={() => setShowLeftPane(!showLeftPane)}
           className="w-12 h-12 bg-blue-500 hover:bg-blue-600 text-white rounded-full shadow-lg flex items-center justify-center text-xl transition-colors"
           title={showLeftPane ? "Hide Song List" : "Show Song List"}
         >
-          {showLeftPane ? '◀' : '▶'}
+          {showLeftPane ? '🢀' : '⧉'}
         </button>
       </div>
     </div>
