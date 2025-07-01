@@ -88,11 +88,6 @@ export default function LyricsView({
     setTempLyrics(songs[title]);
   }, [songs]);
 
-  const handleLyricsEdit = useCallback((title: string) => {
-    setEditingLyrics(title);
-    setTempLyrics(songs[title]);
-  }, [songs]);
-
   const handleTitleSave = useCallback(async (oldTitle: string) => {
     if (tempTitle.trim() && tempTitle !== oldTitle) {
       await onUpdateTitle(oldTitle, tempTitle.trim());
