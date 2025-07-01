@@ -84,9 +84,7 @@ export default function LyricsView({
   const handleTitleEdit = useCallback((title: string) => {
     setEditingTitle(title);
     setTempTitle(title);
-    setEditingLyrics(title);
-    setTempLyrics(songs[title]);
-  }, [songs]);
+  }, []);
 
   const handleLyricsEdit = useCallback((title: string) => {
     setEditingLyrics(title);
@@ -148,7 +146,7 @@ export default function LyricsView({
                 )}
                 className="text-2xl font-bold py-1 px-2 w-full focus:outline-none focus:border-b-2 focus:border-blue-500"
                 style={{ fontSize: `${masterFontSize + 8}px` }}
-                autoFocus={editingLyrics !== item.title}
+                autoFocus
               />
             ) : (
               <div className={`flex items-center justify-between w-full ${!showLeftPane ? 'max-w-3xl mx-auto' : ''}`}>
@@ -161,7 +159,7 @@ export default function LyricsView({
                 <button
                   onClick={() => handleTitleEdit(item.title)}
                   className="p-1 text-gray-400 hover:text-blue-500 transition-colors"
-                  title="Edit Title and Lyrics"
+                  title="Edit Title"
                 >
                   ✎
                 </button>
@@ -169,7 +167,7 @@ export default function LyricsView({
             )}
           </div>
 
-          <div>
+          <div className="relative">
             {editingLyrics === item.title ? (
               <div>
                 <textarea
@@ -178,7 +176,7 @@ export default function LyricsView({
                   onBlur={() => handleLyricsSave(item.title)}
                   className="whitespace-pre-wrap font-sans leading-relaxed w-full min-h-[200px] p-2 focus:outline-none focus:border focus:border-blue-500 rounded"
                   style={{ fontSize: `${masterFontSize}px` }}
-                  autoFocus={editingTitle === item.title}
+                  autoFocus
                 />
                 <div className="absolute top-2 right-2 flex gap-2">
                   <button
@@ -207,6 +205,15 @@ export default function LyricsView({
                   style={{ fontSize: `${masterFontSize}px` }}
                 >
                   {songs[item.title]}
+                </div>
+                <div className="absolute top-0 right-0 flex gap-1">
+                  <button
+                    onClick={() => handleLyricsEdit(item.title)}
+                    className="w-6 h-6 flex items-center justify-center text-gray-400 hover:text-blue-500 transition-colors"
+                    title="Edit Lyrics"
+                  >
+                    ✎
+                  </button>
                 </div>
               </div>
             )}
